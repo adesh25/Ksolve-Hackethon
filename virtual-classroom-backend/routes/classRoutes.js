@@ -1,24 +1,15 @@
-const Class = require('../models/Class');
+const express = require('express');
+const router = express.Router();
+const { createClass, getAllClasses, getClassDetail } = require('../controllers/classController');
+const auth = require('../middleware/authMiddleware');
 
-// Create a Class
-exports.createClass = async (req, res) => {
-    const { title, units } = req.body;
-    const userId = req.user.id; // Assuming user is attached to req in authMiddleware
+// Create a class (protected route)
+router.post('/classes', auth, createClass);
 
-    try {
-        // Create a new class
-        const newClass = new Class({
-            title,
-            units,
-            enrolledStudents: [userId] // Add the creator as an enrolled student
-        });
+// Get all classes (optionally protected if you want only authenticated users)
+router.get('/classes', auth, getAllClasses);
 
-        // Save the class to the database
-        const savedClass = await newClass.save();
+// Get class details by class ID (protected route)
+router.get('/classes/:classId', auth, getClassDetail);
 
-        res.json(savedClass);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-};
+module.exports = router;
